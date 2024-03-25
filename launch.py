@@ -1,5 +1,6 @@
 from fastapi import FastAPI, Query
 from diffusers import DiffusionPipeline, EulerAncestralDiscreteScheduler
+from DeepCache import DeepCacheSDHelper
 import torch
 import random
 import numpy as np
@@ -9,10 +10,10 @@ import io
 import os
 from RealESRGAN import RealESRGAN
 import cv2
-import torch
 import gc
 
 app = FastAPI()
+model_name = "cagliostrolab/animagine-xl-3.1"
 
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
 os.environ["SAFETENSORS_FAST_GPU"] = "1"
@@ -30,12 +31,18 @@ def randomize_seed_fn(seed: int, randomize_seed: bool) -> int:
     return seed
 
 pipe = DiffusionPipeline.from_pretrained(
-    "cagliostrolab/animagine-xl-3.1",
+    model_name,
     custom_pipeline="lpw_stable_diffusion_xl",
     torch_dtype=torch.float16,
     use_safetensors=True,
     add_watermarker=False,
 )
+helper = DeepCacheSDHelper(pipe=pipe)
+helper.set_params(
+    cache_interval=3,
+    cache_branch_id=0,
+)
+helper.enable()
 pipe.to(device)
 
 DEFAULT_CLIP = 2
