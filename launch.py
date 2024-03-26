@@ -37,9 +37,11 @@ pipe = DiffusionPipeline.from_pretrained(
     use_safetensors=True,
     add_watermarker=False,
 )
+#Lower cache_branch_id: This speeds up processing but might make the results less accurate.
+#Larger cache_interval: Faster, but the image quality might suffer.
 helper = DeepCacheSDHelper(pipe=pipe)
 helper.set_params(
-    cache_interval=3,
+    cache_interval=1,
     cache_branch_id=0,
 )
 helper.enable()
@@ -55,9 +57,11 @@ DEFAULT_WIDTH = 832
 DEFAULT_HEIGHT = 1216
 DEFAULT_GUIDANCE_SCALE = 7
 DEFAULT_NUM_INFERENCE_STEPS = 20
+DEEP_CACHE_HELPER = True
 
 @app.post("/generate_image/")
 async def generate_image(
+    deepcache_helper: bool = DEEP_CACHE_HELPER,
     clip_skip: int = DEFAULT_CLIP,
     randomize_seed: bool = DEFAULT_RANDOMIZE_SEED,
     seed: int = DEFAULT_SEED,
@@ -70,6 +74,10 @@ async def generate_image(
     guidance_scale: int = DEFAULT_GUIDANCE_SCALE,
     num_inference_steps: int = DEFAULT_NUM_INFERENCE_STEPS
 ):
+    if deepcache_helper:
+        helper.enable()
+    else:
+        helper.disable()
     pipe.scheduler = EulerAncestralDiscreteScheduler.from_config(pipe.scheduler.config)
     image = pipe(
         clip_skip=clip_skip,
