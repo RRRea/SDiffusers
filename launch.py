@@ -41,8 +41,8 @@ pipe = DiffusionPipeline.from_pretrained(
 #Larger cache_interval: Faster, but the image quality might suffer.
 helper = DeepCacheSDHelper(pipe=pipe)
 helper.set_params(
-    cache_interval=1,
-    cache_branch_id=0,
+    cache_interval=2,
+    cache_branch_id=4,
 )
 helper.enable()
 pipe.to(device)
