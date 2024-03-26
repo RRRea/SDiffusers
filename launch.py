@@ -57,11 +57,9 @@ DEFAULT_WIDTH = 832
 DEFAULT_HEIGHT = 1216
 DEFAULT_GUIDANCE_SCALE = 7
 DEFAULT_NUM_INFERENCE_STEPS = 20
-DEEP_CACHE_HELPER = True
 
 @app.post("/generate_image/")
 async def generate_image(
-    deepcache_helper: bool = DEEP_CACHE_HELPER,
     clip_skip: int = DEFAULT_CLIP,
     randomize_seed: bool = DEFAULT_RANDOMIZE_SEED,
     seed: int = DEFAULT_SEED,
@@ -71,13 +69,9 @@ async def generate_image(
     negative_prompt: str = DEFAULT_NEGATIVE_PROMPT,
     width: int = DEFAULT_WIDTH,
     height: int = DEFAULT_HEIGHT,
-    guidance_scale: int = DEFAULT_GUIDANCE_SCALE,
+    guidance_scale: float = DEFAULT_GUIDANCE_SCALE,
     num_inference_steps: int = DEFAULT_NUM_INFERENCE_STEPS
 ):
-    if deepcache_helper:
-        helper.enable()
-    else:
-        helper.disable()
     pipe.scheduler = EulerAncestralDiscreteScheduler.from_config(pipe.scheduler.config)
     image = pipe(
         clip_skip=clip_skip,
